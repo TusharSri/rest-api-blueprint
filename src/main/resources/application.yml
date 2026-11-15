@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: rest-api-best-practices-java
+  threads:
+    virtual:
+      enabled: true            # Java 21+ virtual threads for request handling
+  mvc:
+    async:
+      request-timeout: 5s      # server-side async timeout -> AsyncRequestTimeoutException -> 503
+  jackson:
+    default-property-inclusion: non_null
+  cache:
+    type: caffeine             # use "none" to disable caching (JMeter cached vs uncached comparison)
+    cache-names: products
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=10m,recordStats
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-change-me-change-me-32bytes!!}   # >= 32 bytes for HS256; override in production
+    ttl-minutes: 60
+  idempotency:
+    ttl-minutes: 10
+  repository:
+    simulated-latency-ms: 25   # fake "database" latency so cache benefits are measurable
+
+logging:
+  pattern:
+    level: "%5p [%X{traceId:-}]"

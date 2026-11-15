@@ -33,5 +33,12 @@ out/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+### JVM diagnostics / profiling output ###
+hs_err_pid*.log
+hs_err_pid*.jfr
+*.jfr
+*.hprof
+
+### JMeter results ###
+jmeter/results/
+*.jtl
