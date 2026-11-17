@@ -1,0 +1,14 @@
+# Test profile: deterministic and fast. Merged on top of src/main/resources/application.yml.
+app:
+  jwt:
+    secret: test-secret-test-secret-test-secret-32b!!
+    ttl-minutes: 5
+  idempotency:
+    ttl-minutes: 1
+  repository:
+    simulated-latency-ms: 0
+
+logging:
+  level:
+    root: WARN
+    org.springframework.security: WARN
