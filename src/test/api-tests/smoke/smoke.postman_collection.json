@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Blueprint API - SMOKE",
+    "description": "Broad and shallow, read-only: safe to run after every deployment, including production. Fails fast.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{userToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "sku",
+      "value": ""
+    },
+    {
+      "key": "idemKey",
+      "value": ""
+    },
+    {
+      "key": "idemSku",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health is UP",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "actuator",
+            "health"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"status UP\", function () { const j = pm.response.json(); pm.expect(j.status === \"UP\", \"status UP\").to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login as user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"token returned\", function () { const j = pm.response.json(); pm.expect(j.data.tokenType === \"Bearer\" && !!j.data.accessToken, \"token returned\").to.be.true; });",
+              "pm.collectionVariables.set(\"userToken\", pm.response.json().data.accessToken);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Anonymous access is rejected",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+              "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"UNAUTHORIZED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products?size=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "size",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"page returned\", function () { const j = pm.response.json(); pm.expect(Array.isArray(j.data) && j.meta.apiVersion === \"1\", \"page returned\").to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read product 1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "1"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"id is 1\", function () { const j = pm.response.json(); pm.expect(j.data.id === 1, \"id is 1\").to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API documentation is served",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v3/api-docs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v3",
+            "api-docs"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"OpenAPI 3\", function () { const j = pm.response.json(); pm.expect(j.openapi.startsWith(\"3\"), \"OpenAPI 3\").to.be.true; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Blueprint API - SMOKE" tests="6" time="0.640">
+  <testsuite name="Health is UP" id="5827ac4d-2e21-48bf-be3f-2628d2a2e8e8" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.102">
+    <testcase name="status is 200" time="0.102" classname="HealthIsUp"/>
+    <testcase name="status UP" time="0.102" classname="HealthIsUp"/>
+  </testsuite>
+  <testsuite name="Login as user" id="bcf357e7-dc74-4609-9969-09ea34b7a146" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.168">
+    <testcase name="status is 200" time="0.168" classname="LoginAsUser"/>
+    <testcase name="token returned" time="0.168" classname="LoginAsUser"/>
+  </testsuite>
+  <testsuite name="Anonymous access is rejected" id="16da57bd-a540-4263-a31e-c28bb0c45e81" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.015">
+    <testcase name="status is 401" time="0.015" classname="AnonymousAccessIsRejected"/>
+    <testcase name="standard error envelope" time="0.015" classname="AnonymousAccessIsRejected"/>
+  </testsuite>
+  <testsuite name="List products" id="74d7c080-9e97-41ac-926e-263e123fc958" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.074">
+    <testcase name="status is 200" time="0.074" classname="ListProducts"/>
+    <testcase name="page returned" time="0.074" classname="ListProducts"/>
+  </testsuite>
+  <testsuite name="Read product 1" id="c19bb340-5c26-4e38-bea1-661b537739e5" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.039">
+    <testcase name="status is 200" time="0.039" classname="ReadProduct1"/>
+    <testcase name="id is 1" time="0.039" classname="ReadProduct1"/>
+  </testsuite>
+  <testsuite name="API documentation is served" id="d2c53349-52e1-4fe9-b260-afd14a815c1d" timestamp="2026-11-18T19:13:12.620Z" tests="2" failures="0" errors="0" time="0.242">
+    <testcase name="status is 200" time="0.242" classname="ApiDocumentationIsServed"/>
+    <testcase name="OpenAPI 3" time="0.242" classname="ApiDocumentationIsServed"/>
+  </testsuite>
+</testsuites>

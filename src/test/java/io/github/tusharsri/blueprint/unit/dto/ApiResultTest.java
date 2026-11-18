@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.tusharsri.blueprint.dto.ApiResult;
 import io.github.tusharsri.blueprint.dto.PageResult;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 class ApiResultTest {
 
     @Test

@@ -1,0 +1,2808 @@
+{
+  "info": {
+    "name": "Blueprint API - REGRESSION",
+    "description": "Everything: all endpoints, roles, validation, errors, versioning, idempotency, headers, timeouts. Creates and deletes its own test data. Use on test/staging, never on production.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{userToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "sku",
+      "value": ""
+    },
+    {
+      "key": "idemKey",
+      "value": ""
+    },
+    {
+      "key": "idemSku",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Setup",
+      "item": [
+        {
+          "name": "Login as user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"token returned\", function () { const j = pm.response.json(); pm.expect(j.data.tokenType === \"Bearer\" && !!j.data.accessToken, \"token returned\").to.be.true; });",
+                  "pm.collectionVariables.set(\"userToken\", pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set(\"adminToken\", pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Authentication",
+      "item": [
+        {
+          "name": "Wrong password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"user\",\"password\":\"nope\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"UNAUTHORIZED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });",
+                  "pm.test(\"generic message\", function () { const j = pm.response.json(); pm.expect(j.message === \"Invalid username or password\", \"generic message\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown user gives the same answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"ghost\",\"password\":\"x\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"generic message\", function () { const j = pm.response.json(); pm.expect(j.message === \"Invalid username or password\", \"generic message\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Blank fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"\",\"password\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"VALIDATION_FAILED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });",
+                  "pm.test(\"both fields reported\", function () { const j = pm.response.json(); pm.expect(j.error.details.length >= 2, \"both fields reported\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Malformed JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{broken",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"BAD_REQUEST\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "No token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"header WWW-Authenticate = Bearer\", function () { pm.expect(pm.response.headers.get(\"WWW-Authenticate\")).to.eql(\"Bearer\"); });",
+                  "pm.test(\"header X-Trace-Id present\", function () { pm.expect(pm.response.headers.has(\"X-Trace-Id\")).to.be.true; });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"UNAUTHORIZED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Garbage token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer not-a-jwt"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Read",
+      "item": [
+        {
+          "name": "List defaults",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"meta\", function () { const j = pm.response.json(); pm.expect(j.meta.page === 0 && j.meta.size === 10 && j.data.length === 10 && j.meta.totalElements >= 30, \"meta\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paging",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&size=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"second page\", function () { const j = pm.response.json(); pm.expect(j.meta.page === 1 && j.data.length === 5 && j.data[0].id === 6, \"second page\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Past the last page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "9999"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"empty\", function () { const j = pm.response.json(); pm.expect(j.data.length === 0, \"empty\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filter by category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?category=BOOKS&size=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "BOOKS"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"all BOOKS\", function () { const j = pm.response.json(); pm.expect(j.data.length > 0 && j.data.every(p => p.category === \"BOOKS\"), \"all BOOKS\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sort by price descending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?sort=price,desc&size=30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "price,desc"
+                },
+                {
+                  "key": "size",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"sorted\", function () { const j = pm.response.json(); pm.expect(j.data.every((p, i) => i === 0 || j.data[i - 1].price >= p.price), \"sorted\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid sort field",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?sort=password,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "password,asc"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"BAD_REQUEST\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid page size",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?size=101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "101"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?category=SPACESHIPS",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "SPACESHIPS"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"RESOURCE_NOT_FOUND\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Non-numeric id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "abc"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/search?name=SAMPLE PRODUCT 1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "SAMPLE PRODUCT 1"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"matches\", function () { const j = pm.response.json(); pm.expect(j.data.length >= 11, \"matches\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search without name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/search",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "search"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Versioning",
+      "item": [
+        {
+          "name": "Default is v1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"v1\", function () { const j = pm.response.json(); pm.expect(j.meta.apiVersion === \"1\" && j.data.sku === undefined, \"v1\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Explicit v2",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Version",
+                "value": "2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"v2\", function () { const j = pm.response.json(); pm.expect(j.meta.apiVersion === \"2\" && j.data.sku === \"SKU-001\", \"v2\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "v2 list",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Version",
+                "value": "2"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?size=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"v2 items\", function () { const j = pm.response.json(); pm.expect(j.data.every(p => !!p.sku), \"v2 items\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unsupported version",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Version",
+                "value": "99"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"client error\", function () { pm.expect(pm.response.code).to.be.within(400, 499); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Write",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 19.99,\n  \"category\": \"BOOKS\",\n  \"sku\": \"{{sku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"sku\", \"API-\" + Math.random().toString(36).substring(2, 10).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"header Location present\", function () { pm.expect(pm.response.headers.has(\"Location\")).to.be.true; });",
+                  "pm.collectionVariables.set(\"productId\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Duplicate SKU",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 19.99,\n  \"category\": \"BOOKS\",\n  \"sku\": \"{{sku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"CONFLICT\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validation: blank name and negative price",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"\", \"price\": -1, \"category\": \"BOOKS\", \"sku\": \"OK-123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"VALIDATION_FAILED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });",
+                  "pm.test(\"fields named\", function () { const j = pm.response.json(); pm.expect(j.error.details.some(d => d.field === \"name\") && j.error.details.some(d => d.field === \"price\"), \"fields named\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown category value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"x\", \"price\": 1, \"category\": \"NOPE\", \"sku\": \"OK-123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Wrong content type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 415\", function () { pm.response.to.have.status(415); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"UNSUPPORTED_MEDIA_TYPE\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Regression replace\",\n  \"description\": \"created by api-tests\",\n  \"price\": 55.5,\n  \"category\": \"HOME\",\n  \"sku\": \"{{sku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"replaced\", function () { const j = pm.response.json(); pm.expect(j.data.name === \"Regression replace\", \"replaced\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT is idempotent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Regression replace\",\n  \"description\": \"created by api-tests\",\n  \"price\": 55.5,\n  \"category\": \"HOME\",\n  \"sku\": \"{{sku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"same result\", function () { const j = pm.response.json(); pm.expect(j.data.name === \"Regression replace\" && j.data.price === 55.5, \"same result\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT on unknown id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 19.99,\n  \"category\": \"BOOKS\",\n  \"sku\": \"NEW-SKU-1\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"stock\": 99}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH validation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"price\": -1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH unknown id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"stock\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Idempotency",
+      "item": [
+        {
+          "name": "First request with key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idemKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 19.99,\n  \"category\": \"BOOKS\",\n  \"sku\": \"{{idemSku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"idemKey\", pm.variables.replaceIn(\"{{$guid}}\")); pm.collectionVariables.set(\"idemSku\", \"IDEM-\" + Math.random().toString(36).substring(2, 10).toUpperCase());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"header Idempotent-Replayed absent\", function () { pm.expect(pm.response.headers.has(\"Idempotent-Replayed\")).to.be.false; });",
+                  "pm.collectionVariables.set(\"idemProductId\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Replay returns the same product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idemKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 19.99,\n  \"category\": \"BOOKS\",\n  \"sku\": \"{{idemSku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"header Idempotent-Replayed = true\", function () { pm.expect(pm.response.headers.get(\"Idempotent-Replayed\")).to.eql(\"true\"); });",
+                  "pm.test(\"same id\", function () { const j = pm.response.json(); pm.expect(j.data.id == pm.collectionVariables.get(\"idemProductId\"), \"same id\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Same key, different body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idemKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"API test product\",\n  \"description\": \"created by api-tests\",\n  \"price\": 77.0,\n  \"category\": \"BOOKS\",\n  \"sku\": \"{{idemSku}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"IDEMPOTENCY_KEY_REUSED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Authorization and cleanup",
+      "item": [
+        {
+          "name": "User cannot delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"FORBIDDEN\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin deletes",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete again is still 204 (idempotent)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted product is gone",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clean up idempotency product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{idemProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{idemProductId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 Errors and tracing",
+      "item": [
+        {
+          "name": "Method not allowed",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 405\", function () { pm.response.to.have.status(405); });",
+                  "pm.test(\"header Allow present\", function () { pm.expect(pm.response.headers.has(\"Allow\")).to.be.true; });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"METHOD_NOT_ALLOWED\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unknown path",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/no-such-endpoint",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "no-such-endpoint"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"NOT_FOUND\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Trace id is echoed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Trace-Id",
+                "value": "regression-trace-1"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"header X-Trace-Id = regression-trace-1\", function () { pm.expect(pm.response.headers.get(\"X-Trace-Id\")).to.eql(\"regression-trace-1\"); });",
+                  "pm.test(\"in body\", function () { const j = pm.response.json(); pm.expect(j.error.traceId === \"regression-trace-1\", \"in body\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unexpected error does not leak details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/boom",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "boom"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 500\", function () { pm.response.to.have.status(500); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"INTERNAL_ERROR\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });",
+                  "pm.test(\"generic message\", function () { const j = pm.response.json(); pm.expect(j.message === \"An unexpected error occurred\" && !JSON.stringify(j).includes(\"Exception\"), \"generic message\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 Every status code",
+      "item": [
+        {
+          "name": "Status 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/200",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "200"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"status in body\", function () { const j = pm.response.json(); pm.expect(j.status === 200, \"status in body\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 201",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/201",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "201"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"status in body\", function () { const j = pm.response.json(); pm.expect(j.status === 201, \"status in body\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 202",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/202",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "202"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 202\", function () { pm.response.to.have.status(202); });",
+                  "pm.test(\"status in body\", function () { const j = pm.response.json(); pm.expect(j.status === 202, \"status in body\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 204",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/204",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "204"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/400",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "400"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 400 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/401",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "401"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 401 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/403",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "403"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 403\", function () { pm.response.to.have.status(403); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 403 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/404",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "404"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 404 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 405",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/405",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "405"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 405\", function () { pm.response.to.have.status(405); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 405 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 406",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/406",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "406"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 406\", function () { pm.response.to.have.status(406); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 406 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 409",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/409",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "409"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 409\", function () { pm.response.to.have.status(409); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 409 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 415",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/415",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "415"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 415\", function () { pm.response.to.have.status(415); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 415 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 422",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/422",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "422"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 422 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 429",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/429",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "429"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 429\", function () { pm.response.to.have.status(429); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 429 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 500",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/500",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "500"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 500\", function () { pm.response.to.have.status(500); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 500 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 503",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/503",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "503"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 503\", function () { pm.response.to.have.status(503); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 503 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status 504",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/status/504",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "status",
+                "504"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 504\", function () { pm.response.to.have.status(504); });",
+                  "pm.test(\"error envelope\", function () { const j = pm.response.json(); pm.expect(j.status === 504 && !!j.error.code && !!j.error.traceId, \"error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 Timeouts",
+      "item": [
+        {
+          "name": "Fast upstream call",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/slow?delaySeconds=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "slow"
+              ],
+              "query": [
+                {
+                  "key": "delaySeconds",
+                  "value": "0"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"done\", function () { const j = pm.response.json(); pm.expect(j.data === \"done\", \"done\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Slow upstream call times out",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/slow?delaySeconds=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "slow"
+              ],
+              "query": [
+                {
+                  "key": "delaySeconds",
+                  "value": "5"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 504\", function () { pm.response.to.have.status(504); });",
+                  "pm.test(\"standard error envelope\", function () { const j = pm.response.json(); pm.expect(j.error && j.error.code === \"GATEWAY_TIMEOUT\" && !!j.error.traceId && !!j.error.path, \"standard error envelope\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delay is validated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo/slow?delaySeconds=31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo",
+                "slow"
+              ],
+              "query": [
+                {
+                  "key": "delaySeconds",
+                  "value": "31"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10 Docs and operations",
+      "item": [
+        {
+          "name": "OpenAPI document",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v3/api-docs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v3",
+                "api-docs"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"documented\", function () { const j = pm.response.json(); pm.expect(Object.keys(j.paths).includes(\"/api/products\") && j.components.securitySchemes.bearerAuth.scheme === \"bearer\", \"documented\").to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health is public",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Caches: anonymous",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/caches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "caches"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Caches: user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/caches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "caches"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Caches: admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/caches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actuator",
+                "caches"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

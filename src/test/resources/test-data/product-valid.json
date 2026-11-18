@@ -1,0 +1,8 @@
+{
+  "name": "Fixture product",
+  "description": "Loaded from a fixture file",
+  "price": 25.00,
+  "category": "HOME",
+  "sku": "${sku}",
+  "stock": 7
+}

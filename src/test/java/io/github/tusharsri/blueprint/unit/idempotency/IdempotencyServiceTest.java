@@ -7,6 +7,7 @@ import io.github.tusharsri.blueprint.config.AppProperties;
 import io.github.tusharsri.blueprint.exception.ApiException;
 import io.github.tusharsri.blueprint.idempotency.IdempotencyOutcome;
 import io.github.tusharsri.blueprint.idempotency.IdempotencyService;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 class IdempotencyServiceTest {
 
     private IdempotencyService service;

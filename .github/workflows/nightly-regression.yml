@@ -1,0 +1,44 @@
+# Copy to .github/workflows/nightly-regression.yml
+# Full regression every night (and on demand): in-process suites plus the black-box regression against a running app.
+name: Nightly regression
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+
+      - name: In-process regression (all tagged suites)
+        run: chmod +x gradlew && ./gradlew regressionTest --no-daemon --stacktrace
+
+      - name: Start the application
+        run: |
+          nohup ./gradlew bootRun --no-daemon > app.log 2>&1 &
+          curl --silent --fail --retry 60 --retry-delay 3 --retry-connrefused http://localhost:8080/actuator/health
+
+      - name: Black-box regression
+        run: src/test/api-tests/run-newman.sh regression ci
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly-results
+          path: |
+            build/reports/tests/
+            src/test/api-tests/reports/
+            app.log
+          if-no-files-found: ignore

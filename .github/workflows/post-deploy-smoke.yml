@@ -1,0 +1,33 @@
+# Copy to .github/workflows/post-deploy-smoke.yml
+# Run after a deployment (call it from your deploy workflow or trigger it by hand).
+# Smoke is read-only, so it is safe against production. Never point sanity or regression at production.
+name: Post-deploy smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL of the deployed application'
+        required: true
+        default: 'https://staging.example.com'
+      environment:
+        description: 'Environment file (local, ci, staging)'
+        required: true
+        default: 'staging'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Smoke suite
+        run: BASE_URL="${{ inputs.base_url }}" src/test/api-tests/run-newman.sh smoke "${{ inputs.environment }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: smoke-results, path: src/test/api-tests/reports/, if-no-files-found: ignore }

@@ -40,3 +40,5 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+apply(from = "src/test/gradle/test-suites.gradle.kts")

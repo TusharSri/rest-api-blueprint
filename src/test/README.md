@@ -1,25 +1,48 @@
-# Test suite
+# Tests
 
-| Layer | Package | What it proves | Spring context |
-|---|---|---|---|
-| Unit | `unit.service` | Business rules: paging, sorting, filtering, create/replace/patch/delete, auth logic | none |
-| Unit | `unit.repository` | Thread safety: unique ids, SKU uniqueness under concurrency | none |
-| Unit | `unit.idempotency` | Replay, payload mismatch (422), failed actions not stored, exactly-once under concurrency | none |
-| Unit | `unit.security` | JWT claims, lifetime, tamper and wrong-key rejection | none |
-| Unit | `unit.exception` | Status code + error envelope for every exception type | none |
-| Unit | `unit.dto` | Response envelope and paging helpers | none |
-| API | `api` | The full HTTP stack with the real security filter chain: auth, roles, CRUD, validation, versioning, idempotency, caching, error format, trace id, timeouts, OpenAPI | one shared context |
-| Architecture | `architecture` | Layering, constructor injection, DTOs are records, controllers never expose domain objects | none |
+Strategy, suite definitions, schedule and traceability: see **[TEST_PLAN.md](TEST_PLAN.md)**.
 
-Conventions
-- `*Test` classes are plain unit/architecture tests; `*ApiTest` classes extend `support.AbstractApiIntegrationTest`.
-- Test data is created per test with unique SKUs; tests never delete or rely on state left by other tests (seeded products 1-30 are read-only for tests).
-- `src/test/resources/application-test.yml` (profile `test`): fixed JWT secret, no simulated latency.
-- Test names use underscores and are rendered as sentences (`junit-platform.properties`).
+```
+src/test/
+|-- java/io/github/tusharsri/blueprint/
+|   |-- unit/            service, repository, idempotency, security, exception, dto        (no Spring)
+|   |-- architecture/    layering and design rules                                          (no Spring)
+|   |-- integration/     auth/  product/  platform/  controller/                            (full HTTP stack, MockMvc)
+|   |-- contract/        response shapes, error envelope, status matrix, OpenAPI baseline
+|   |-- suites/          SmokeSuiteTest, SanitySuiteTest
+|   |-- regression/      KnownIssuesRegressionTest (pinned defects)
+|   `-- support/         base class, TestData, suite annotations
+|-- resources/
+|   |-- application-test.yml        test profile (fixed secret, no latency)
+|   |-- junit-platform.properties   readable test names
+|   |-- test-data/                  JSON fixtures
+|   `-- contract/                   openapi-baseline.json (create once, see below)
+|-- api-tests/        black-box Postman/Newman suites: smoke, sanity, regression (+ run scripts)
+|-- gradle/           test-suites.gradle.kts  (suite tasks)
+|-- ci/               GitHub Actions templates: ci, nightly-regression, post-deploy-smoke
+|-- TEST_PLAN.md
+`-- README.md
+```
 
-Run
-    ./gradlew test                                  # everything (CI does this)
-    ./gradlew test --tests "*unit*"                 # fast unit tests only
-    ./gradlew test --tests "*ApiTest"               # API tests only
-    ./gradlew test --tests "*ArchitectureTest"
-Reports: build/reports/tests/test/index.html
+## Run
+```bash
+./gradlew test               # everything in-process (what CI gates on)
+./gradlew unitTest           # seconds
+./gradlew integrationTest
+./gradlew contractTest
+./gradlew architectureTest
+./gradlew smokeTest          # is it alive?
+./gradlew sanityTest         # do the core flows work?
+./gradlew regressionTest     # all tagged suites
+
+# black-box, against a running app (./gradlew bootRun in another terminal)
+src/test/api-tests/run-newman.sh smoke        # Windows: src\test\api-tests\run-newman.bat smoke
+src/test/api-tests/run-newman.sh sanity
+src/test/api-tests/run-newman.sh regression
+```
+
+## Adding a test
+- New behaviour: add an integration test in the matching `integration/` package (extend `AbstractApiIntegrationTest`) and, if it is pure logic, a unit test.
+- New defect: add `issue_<what_broke>` to `regression/KnownIssuesRegressionTest`.
+- Changed response shape: update `contract/ResponseSchemaContractTest` and bump the API version.
+- Always annotate the top-level class with its suite annotation from `support/`.
