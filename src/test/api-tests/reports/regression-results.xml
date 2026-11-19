@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Blueprint API - REGRESSION" tests="72" time="4.214">
+  <testsuite name="00 Setup / Login as user" id="63a75d13-081e-4792-bf83-668a531120d7" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.080">
+    <testcase name="status is 200" time="0.080" classname="00SetupLoginAsUser"/>
+    <testcase name="token returned" time="0.080" classname="00SetupLoginAsUser"/>
+  </testsuite>
+  <testsuite name="00 Setup / Login as admin" id="818c4882-3a64-4922-be1f-8484766d371b" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.072">
+    <testcase name="status is 200" time="0.072" classname="00SetupLoginAsAdmin"/>
+  </testsuite>
+  <testsuite name="01 Authentication / Wrong password" id="e447410b-ff31-41a2-b580-ea5673b3de52" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.064">
+    <testcase name="status is 401" time="0.064" classname="01AuthenticationWrongPassword"/>
+    <testcase name="standard error envelope" time="0.064" classname="01AuthenticationWrongPassword"/>
+    <testcase name="generic message" time="0.064" classname="01AuthenticationWrongPassword"/>
+  </testsuite>
+  <testsuite name="01 Authentication / Unknown user gives the same answer" id="8e0c819a-df6e-4bf3-9474-7dadcdda5c89" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="status is 401" time="0.005" classname="01AuthenticationUnknownUserGivesTheSameAnswer"/>
+    <testcase name="generic message" time="0.005" classname="01AuthenticationUnknownUserGivesTheSameAnswer"/>
+  </testsuite>
+  <testsuite name="01 Authentication / Blank fields" id="08e1e906-ced9-4b26-95f9-a301e5a14824" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.017">
+    <testcase name="status is 400" time="0.017" classname="01AuthenticationBlankFields"/>
+    <testcase name="standard error envelope" time="0.017" classname="01AuthenticationBlankFields"/>
+    <testcase name="both fields reported" time="0.017" classname="01AuthenticationBlankFields"/>
+  </testsuite>
+  <testsuite name="01 Authentication / Malformed JSON" id="de0e2321-cc51-4a3e-ab90-d5c887bd38e5" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 400" time="0.008" classname="01AuthenticationMalformedJson"/>
+    <testcase name="standard error envelope" time="0.008" classname="01AuthenticationMalformedJson"/>
+  </testsuite>
+  <testsuite name="01 Authentication / No token" id="1d8edcd9-4b66-433b-83c6-518761fc091e" timestamp="2026-11-18T19:13:50.387Z" tests="4" failures="0" errors="0" time="0.004">
+    <testcase name="status is 401" time="0.004" classname="01AuthenticationNoToken"/>
+    <testcase name="header WWW-Authenticate = Bearer" time="0.004" classname="01AuthenticationNoToken"/>
+    <testcase name="header X-Trace-Id present" time="0.004" classname="01AuthenticationNoToken"/>
+    <testcase name="standard error envelope" time="0.004" classname="01AuthenticationNoToken"/>
+  </testsuite>
+  <testsuite name="01 Authentication / Garbage token" id="650ac57c-1297-40ba-b447-ff0c9a193785" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="status is 401" time="0.009" classname="01AuthenticationGarbageToken"/>
+  </testsuite>
+  <testsuite name="02 Read / List defaults" id="a5f96646-bfe9-4ce7-acf0-2b4b144824f6" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.035">
+    <testcase name="status is 200" time="0.035" classname="02ReadListDefaults"/>
+    <testcase name="meta" time="0.035" classname="02ReadListDefaults"/>
+  </testsuite>
+  <testsuite name="02 Read / Paging" id="bf6f23b2-c8a4-4e42-a463-5260414534a2" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.035">
+    <testcase name="status is 200" time="0.035" classname="02ReadPaging"/>
+    <testcase name="second page" time="0.035" classname="02ReadPaging"/>
+  </testsuite>
+  <testsuite name="02 Read / Past the last page" id="6324e27e-7bb7-4b3a-9976-ef01e26cd786" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.035">
+    <testcase name="status is 200" time="0.035" classname="02ReadPastTheLastPage"/>
+    <testcase name="empty" time="0.035" classname="02ReadPastTheLastPage"/>
+  </testsuite>
+  <testsuite name="02 Read / Filter by category" id="93166d74-edca-43b3-bfbb-51733cdc34bc" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.036">
+    <testcase name="status is 200" time="0.036" classname="02ReadFilterByCategory"/>
+    <testcase name="all BOOKS" time="0.036" classname="02ReadFilterByCategory"/>
+  </testsuite>
+  <testsuite name="02 Read / Sort by price descending" id="b69ec457-aead-4b6f-b96e-f7a245157de9" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.036">
+    <testcase name="status is 200" time="0.036" classname="02ReadSortByPriceDescending"/>
+    <testcase name="sorted" time="0.036" classname="02ReadSortByPriceDescending"/>
+  </testsuite>
+  <testsuite name="02 Read / Invalid sort field" id="ab77e6d0-cabc-4ac2-a6b9-c649c830f431" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="status is 400" time="0.010" classname="02ReadInvalidSortField"/>
+    <testcase name="standard error envelope" time="0.010" classname="02ReadInvalidSortField"/>
+  </testsuite>
+  <testsuite name="02 Read / Invalid page size" id="31e0cf6e-5ceb-4d7b-9ab1-80bd7a4efd04" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.013">
+    <testcase name="status is 400" time="0.013" classname="02ReadInvalidPageSize"/>
+  </testsuite>
+  <testsuite name="02 Read / Unknown category" id="a84bed6d-269e-4d84-b997-a17c94d3ddfb" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="status is 400" time="0.006" classname="02ReadUnknownCategory"/>
+  </testsuite>
+  <testsuite name="02 Read / Unknown id" id="d428782a-e5d1-46f6-9dc8-44f7ab11be66" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="status is 404" time="0.038" classname="02ReadUnknownId"/>
+    <testcase name="standard error envelope" time="0.038" classname="02ReadUnknownId"/>
+  </testsuite>
+  <testsuite name="02 Read / Non-numeric id" id="37ae7abb-4ccc-4c55-a5d6-1f0846ea8bf7" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="status is 400" time="0.008" classname="02ReadNonNumericId"/>
+  </testsuite>
+  <testsuite name="02 Read / Search" id="16aff661-2675-4c1b-a518-522c79de3cd5" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="status is 200" time="0.038" classname="02ReadSearch"/>
+    <testcase name="matches" time="0.038" classname="02ReadSearch"/>
+  </testsuite>
+  <testsuite name="02 Read / Search without name" id="8fe2fe0a-c536-420c-aa82-788804b5c08a" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="status is 400" time="0.008" classname="02ReadSearchWithoutName"/>
+  </testsuite>
+  <testsuite name="03 Versioning / Default is v1" id="03bc4847-2860-40fa-bb40-ab24624ef83a" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="status is 200" time="0.009" classname="03VersioningDefaultIsV1"/>
+    <testcase name="v1" time="0.009" classname="03VersioningDefaultIsV1"/>
+  </testsuite>
+  <testsuite name="03 Versioning / Explicit v2" id="347e623c-8cda-42ce-8efd-7580eaf852ba" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="status is 200" time="0.005" classname="03VersioningExplicitV2"/>
+    <testcase name="v2" time="0.005" classname="03VersioningExplicitV2"/>
+  </testsuite>
+  <testsuite name="03 Versioning / v2 list" id="55f4ffe8-2e9e-4af5-97b0-bf5ff49fc337" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.035">
+    <testcase name="status is 200" time="0.035" classname="03VersioningV2List"/>
+    <testcase name="v2 items" time="0.035" classname="03VersioningV2List"/>
+  </testsuite>
+  <testsuite name="03 Versioning / Unsupported version" id="f2bc59bb-9f84-49c3-b6ec-349eb29ccf43" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="client error" time="0.008" classname="03VersioningUnsupportedVersion"/>
+  </testsuite>
+  <testsuite name="04 Write / Create" id="71ea8811-8e2f-4ab1-81b9-8dde1cf24d35" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="status is 201" time="0.009" classname="04WriteCreate"/>
+    <testcase name="header Location present" time="0.009" classname="04WriteCreate"/>
+  </testsuite>
+  <testsuite name="04 Write / Duplicate SKU" id="ae4a40bd-1de5-44fb-924c-425beeb69752" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="status is 409" time="0.005" classname="04WriteDuplicateSku"/>
+    <testcase name="standard error envelope" time="0.005" classname="04WriteDuplicateSku"/>
+  </testsuite>
+  <testsuite name="04 Write / Validation: blank name and negative price" id="1d96d92c-639a-4a19-a15c-d2fb3c6eb15e" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.012">
+    <testcase name="status is 400" time="0.012" classname="04WriteValidationBlankNameAndNegativePrice"/>
+    <testcase name="standard error envelope" time="0.012" classname="04WriteValidationBlankNameAndNegativePrice"/>
+    <testcase name="fields named" time="0.012" classname="04WriteValidationBlankNameAndNegativePrice"/>
+  </testsuite>
+  <testsuite name="04 Write / Unknown category value" id="93cefa79-12dd-4fb3-ab1f-f49cf9a2a591" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.010">
+    <testcase name="status is 400" time="0.010" classname="04WriteUnknownCategoryValue"/>
+  </testsuite>
+  <testsuite name="04 Write / Wrong content type" id="e1d5fc15-a93b-4dd8-b47a-33480156774a" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="status is 415" time="0.011" classname="04WriteWrongContentType"/>
+    <testcase name="standard error envelope" time="0.011" classname="04WriteWrongContentType"/>
+  </testsuite>
+  <testsuite name="04 Write / PUT" id="95bfc6e0-6e12-4ac5-8571-bd8baed1bffc" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.038">
+    <testcase name="status is 200" time="0.038" classname="04WritePut"/>
+    <testcase name="replaced" time="0.038" classname="04WritePut"/>
+  </testsuite>
+  <testsuite name="04 Write / PUT is idempotent" id="60791ac1-df16-4854-965b-44297f04f848" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.039">
+    <testcase name="status is 200" time="0.039" classname="04WritePutIsIdempotent"/>
+    <testcase name="same result" time="0.039" classname="04WritePutIsIdempotent"/>
+  </testsuite>
+  <testsuite name="04 Write / PUT on unknown id" id="818993a3-673f-4ccf-bfac-20e4b0026a33" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.033">
+    <testcase name="status is 404" time="0.033" classname="04WritePutOnUnknownId"/>
+  </testsuite>
+  <testsuite name="04 Write / PATCH" id="e4d496bd-b77b-4d66-9ea0-d4fc803579aa" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.037">
+    <testcase name="status is 200" time="0.037" classname="04WritePatch"/>
+  </testsuite>
+  <testsuite name="04 Write / PATCH validation" id="d2f109a1-9aaf-4195-98af-dbd84b4f522b" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="status is 400" time="0.009" classname="04WritePatchValidation"/>
+  </testsuite>
+  <testsuite name="04 Write / PATCH unknown id" id="35cdfc0d-611f-491e-addd-c1e7b717e979" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.036">
+    <testcase name="status is 404" time="0.036" classname="04WritePatchUnknownId"/>
+  </testsuite>
+  <testsuite name="05 Idempotency / First request with key" id="8f6b61f5-80be-42a8-82f1-bf9b7a443ed8" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 201" time="0.007" classname="05IdempotencyFirstRequestWithKey"/>
+    <testcase name="header Idempotent-Replayed absent" time="0.007" classname="05IdempotencyFirstRequestWithKey"/>
+  </testsuite>
+  <testsuite name="05 Idempotency / Replay returns the same product" id="fd6d8eb7-9ef0-47f6-ac23-e78acee907b2" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.008">
+    <testcase name="status is 201" time="0.008" classname="05IdempotencyReplayReturnsTheSameProduct"/>
+    <testcase name="header Idempotent-Replayed = true" time="0.008" classname="05IdempotencyReplayReturnsTheSameProduct"/>
+    <testcase name="same id" time="0.008" classname="05IdempotencyReplayReturnsTheSameProduct"/>
+  </testsuite>
+  <testsuite name="05 Idempotency / Same key, different body" id="6a036a1f-e786-4bcc-a9ee-d5b1ff85b1b1" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 422" time="0.008" classname="05IdempotencySameKeyDifferentBody"/>
+    <testcase name="standard error envelope" time="0.008" classname="05IdempotencySameKeyDifferentBody"/>
+  </testsuite>
+  <testsuite name="06 Authorization and cleanup / User cannot delete" id="67092a16-3902-4018-b94e-94d126d752f3" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="status is 403" time="0.006" classname="06AuthorizationAndCleanupUserCannotDelete"/>
+    <testcase name="standard error envelope" time="0.006" classname="06AuthorizationAndCleanupUserCannotDelete"/>
+  </testsuite>
+  <testsuite name="06 Authorization and cleanup / Admin deletes" id="79407f96-3d9c-4175-b8eb-13dfcd487c92" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="status is 204" time="0.006" classname="06AuthorizationAndCleanupAdminDeletes"/>
+  </testsuite>
+  <testsuite name="06 Authorization and cleanup / Delete again is still 204 (idempotent)" id="d2b2b959-d7d2-4a2e-ae63-aec2acf8e91c" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="status is 204" time="0.008" classname="06AuthorizationAndCleanupDeleteAgainIsStill204Idempotent"/>
+  </testsuite>
+  <testsuite name="06 Authorization and cleanup / Deleted product is gone" id="c72ab57a-aa4a-4a7b-9b9b-b7dbdac5a544" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.033">
+    <testcase name="status is 404" time="0.033" classname="06AuthorizationAndCleanupDeletedProductIsGone"/>
+  </testsuite>
+  <testsuite name="06 Authorization and cleanup / Clean up idempotency product" id="848e2a9e-0b1c-4016-84cc-81f051b4538e" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="status is 204" time="0.005" classname="06AuthorizationAndCleanupCleanUpIdempotencyProduct"/>
+  </testsuite>
+  <testsuite name="07 Errors and tracing / Method not allowed" id="1558a28b-5ba1-4abe-bc7b-9ac31b92301a" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.009">
+    <testcase name="status is 405" time="0.009" classname="07ErrorsAndTracingMethodNotAllowed"/>
+    <testcase name="header Allow present" time="0.009" classname="07ErrorsAndTracingMethodNotAllowed"/>
+    <testcase name="standard error envelope" time="0.009" classname="07ErrorsAndTracingMethodNotAllowed"/>
+  </testsuite>
+  <testsuite name="07 Errors and tracing / Unknown path" id="f3be2277-245a-4495-b30c-8232bded4011" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.013">
+    <testcase name="status is 404" time="0.013" classname="07ErrorsAndTracingUnknownPath"/>
+    <testcase name="standard error envelope" time="0.013" classname="07ErrorsAndTracingUnknownPath"/>
+  </testsuite>
+  <testsuite name="07 Errors and tracing / Trace id is echoed" id="683954ae-6274-4dc6-809f-e5d632ca9901" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.030">
+    <testcase name="status is 404" time="0.030" classname="07ErrorsAndTracingTraceIdIsEchoed"/>
+    <testcase name="header X-Trace-Id = regression-trace-1" time="0.030" classname="07ErrorsAndTracingTraceIdIsEchoed"/>
+    <testcase name="in body" time="0.030" classname="07ErrorsAndTracingTraceIdIsEchoed"/>
+  </testsuite>
+  <testsuite name="07 Errors and tracing / Unexpected error does not leak details" id="d6861b44-fcf0-4224-9aa1-0f49e22f4ca6" timestamp="2026-11-18T19:13:50.387Z" tests="3" failures="0" errors="0" time="0.012">
+    <testcase name="status is 500" time="0.012" classname="07ErrorsAndTracingUnexpectedErrorDoesNotLeakDetails"/>
+    <testcase name="standard error envelope" time="0.012" classname="07ErrorsAndTracingUnexpectedErrorDoesNotLeakDetails"/>
+    <testcase name="generic message" time="0.012" classname="07ErrorsAndTracingUnexpectedErrorDoesNotLeakDetails"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 200" id="a40a7ada-c3e0-47a9-8c48-6912f14d0184" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 200" time="0.008" classname="08EveryStatusCodeStatus200"/>
+    <testcase name="status in body" time="0.008" classname="08EveryStatusCodeStatus200"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 201" id="20399f96-bbb9-4b34-a734-23fe87985d6b" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="status is 201" time="0.009" classname="08EveryStatusCodeStatus201"/>
+    <testcase name="status in body" time="0.009" classname="08EveryStatusCodeStatus201"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 202" id="7ee243e1-cfdb-44a2-986b-5f3ed0c75990" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.003">
+    <testcase name="status is 202" time="0.003" classname="08EveryStatusCodeStatus202"/>
+    <testcase name="status in body" time="0.003" classname="08EveryStatusCodeStatus202"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 204" id="3936c68a-8024-44b5-89e7-fe536f735b3a" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="status is 204" time="0.005" classname="08EveryStatusCodeStatus204"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 400" id="ef640dba-b65f-4220-8835-97d987486852" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="status is 400" time="0.006" classname="08EveryStatusCodeStatus400"/>
+    <testcase name="error envelope" time="0.006" classname="08EveryStatusCodeStatus400"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 401" id="4ca4bddd-09d5-4968-a45f-ee3d82671f8f" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 401" time="0.007" classname="08EveryStatusCodeStatus401"/>
+    <testcase name="error envelope" time="0.007" classname="08EveryStatusCodeStatus401"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 403" id="5a28dfca-3a05-481c-a7d2-cbc9c1c7fce5" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 403" time="0.008" classname="08EveryStatusCodeStatus403"/>
+    <testcase name="error envelope" time="0.008" classname="08EveryStatusCodeStatus403"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 404" id="785df89d-b0e3-4b95-848f-5a00c22dcbdc" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="status is 404" time="0.006" classname="08EveryStatusCodeStatus404"/>
+    <testcase name="error envelope" time="0.006" classname="08EveryStatusCodeStatus404"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 405" id="54675ad4-3af1-44ec-8024-90d3996807df" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="status is 405" time="0.005" classname="08EveryStatusCodeStatus405"/>
+    <testcase name="error envelope" time="0.005" classname="08EveryStatusCodeStatus405"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 406" id="240f47ee-7463-490a-90b0-e5faeb78397e" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 406" time="0.008" classname="08EveryStatusCodeStatus406"/>
+    <testcase name="error envelope" time="0.008" classname="08EveryStatusCodeStatus406"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 409" id="6b75d3d9-834d-4522-8b6a-59da44db2cd7" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 409" time="0.007" classname="08EveryStatusCodeStatus409"/>
+    <testcase name="error envelope" time="0.007" classname="08EveryStatusCodeStatus409"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 415" id="082a93b2-2b3b-4ff3-9ca0-5ca39c8533cc" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 415" time="0.007" classname="08EveryStatusCodeStatus415"/>
+    <testcase name="error envelope" time="0.007" classname="08EveryStatusCodeStatus415"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 422" id="1e32d61e-9654-41ef-8cc3-92871e4440a8" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 422" time="0.008" classname="08EveryStatusCodeStatus422"/>
+    <testcase name="error envelope" time="0.008" classname="08EveryStatusCodeStatus422"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 429" id="6db14d98-ae79-42fb-8b8f-d792505edcf2" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 429" time="0.007" classname="08EveryStatusCodeStatus429"/>
+    <testcase name="error envelope" time="0.007" classname="08EveryStatusCodeStatus429"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 500" id="20c34426-b910-40f5-aa9e-3945b8be5c49" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="status is 500" time="0.009" classname="08EveryStatusCodeStatus500"/>
+    <testcase name="error envelope" time="0.009" classname="08EveryStatusCodeStatus500"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 503" id="deb149ba-8087-48e7-a583-fc7a2d2c1467" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 503" time="0.008" classname="08EveryStatusCodeStatus503"/>
+    <testcase name="error envelope" time="0.008" classname="08EveryStatusCodeStatus503"/>
+  </testsuite>
+  <testsuite name="08 Every status code / Status 504" id="b18bfb6b-9b4f-404b-8346-64a892a4939b" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="status is 504" time="0.010" classname="08EveryStatusCodeStatus504"/>
+    <testcase name="error envelope" time="0.010" classname="08EveryStatusCodeStatus504"/>
+  </testsuite>
+  <testsuite name="09 Timeouts / Fast upstream call" id="2c6b9748-9fc5-4f70-aaf8-d097bce25fa3" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.020">
+    <testcase name="status is 200" time="0.020" classname="09TimeoutsFastUpstreamCall"/>
+    <testcase name="done" time="0.020" classname="09TimeoutsFastUpstreamCall"/>
+  </testsuite>
+  <testsuite name="09 Timeouts / Slow upstream call times out" id="88ebf821-a738-4ecc-bfdd-905d2d26b569" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="3.012">
+    <testcase name="status is 504" time="3.012" classname="09TimeoutsSlowUpstreamCallTimesOut"/>
+    <testcase name="standard error envelope" time="3.012" classname="09TimeoutsSlowUpstreamCallTimesOut"/>
+  </testsuite>
+  <testsuite name="09 Timeouts / Delay is validated" id="6141b0ea-ee4a-452b-ae54-713c9ccd097d" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="status is 400" time="0.006" classname="09TimeoutsDelayIsValidated"/>
+  </testsuite>
+  <testsuite name="10 Docs and operations / OpenAPI document" id="74eb07e6-4333-4ded-9271-dc92b7bcc91a" timestamp="2026-11-18T19:13:50.387Z" tests="2" failures="0" errors="0" time="0.019">
+    <testcase name="status is 200" time="0.019" classname="10DocsAndOperationsOpenApiDocument"/>
+    <testcase name="documented" time="0.019" classname="10DocsAndOperationsOpenApiDocument"/>
+  </testsuite>
+  <testsuite name="10 Docs and operations / Health is public" id="edb98186-330f-48d3-9bfb-cd28e096033b" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.010">
+    <testcase name="status is 200" time="0.010" classname="10DocsAndOperationsHealthIsPublic"/>
+  </testsuite>
+  <testsuite name="10 Docs and operations / Caches: anonymous" id="3068abfc-a6d1-4bcb-a938-7c45f035a9ea" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="status is 401" time="0.009" classname="10DocsAndOperationsCachesAnonymous"/>
+  </testsuite>
+  <testsuite name="10 Docs and operations / Caches: user" id="207854c9-00c4-47fe-8bb9-b18fc0884e71" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="status is 403" time="0.009" classname="10DocsAndOperationsCachesUser"/>
+  </testsuite>
+  <testsuite name="10 Docs and operations / Caches: admin" id="d1981ab6-aaa7-4af7-9885-9ac8eabafafc" timestamp="2026-11-18T19:13:50.387Z" tests="1" failures="0" errors="0" time="0.010">
+    <testcase name="status is 200" time="0.010" classname="10DocsAndOperationsCachesAdmin"/>
+  </testsuite>
+</testsuites>

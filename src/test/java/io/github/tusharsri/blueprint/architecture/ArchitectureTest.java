@@ -2,6 +2,7 @@ package io.github.tusharsri.blueprint.architecture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.tusharsri.blueprint.support.ArchitectureCheck;
 import io.github.tusharsri.blueprint.util.ApiConstants;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -12,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Architecture rules enforced as plain tests (no extra library): layering, injection style, and DTO design.
  * They scan the compiled main classes, so a violation fails the build.
  */
+@ArchitectureCheck
 class ArchitectureTest {
 
     private static final String ROOT = ArchitectureTest.class.getPackageName().replaceFirst("\\.architecture$", "");

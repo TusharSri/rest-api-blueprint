@@ -7,6 +7,7 @@ import io.github.tusharsri.blueprint.dto.ProductRequest;
 import io.github.tusharsri.blueprint.exception.ConflictException;
 import io.github.tusharsri.blueprint.exception.GlobalExceptionHandler;
 import io.github.tusharsri.blueprint.exception.ResourceNotFoundException;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import io.github.tusharsri.blueprint.util.ApiConstants;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -32,6 +33,7 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.server.ResponseStatusException;
 
 /** Verifies the status code and the standard error envelope for every exception type, without Spring. */
+@UnitTest
 class GlobalExceptionHandlerTest {
 
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();

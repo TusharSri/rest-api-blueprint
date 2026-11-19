@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Blueprint API - SANITY" tests="14" time="0.361">
+  <testsuite name="Setup / Login as user" id="ebd12d61-edf2-4ff9-82c4-cec047671185" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.081">
+    <testcase name="status is 200" time="0.081" classname="SetupLoginAsUser"/>
+    <testcase name="token returned" time="0.081" classname="SetupLoginAsUser"/>
+  </testsuite>
+  <testsuite name="Setup / Login as admin" id="4bf485e1-c874-474f-878b-ccebd3222fbb" timestamp="2026-11-18T19:13:33.982Z" tests="1" failures="0" errors="0" time="0.066">
+    <testcase name="status is 200" time="0.066" classname="SetupLoginAsAdmin"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Create" id="cb79db74-664f-496b-9d40-e408227e461e" timestamp="2026-11-18T19:13:33.982Z" tests="3" failures="0" errors="0" time="0.025">
+    <testcase name="status is 201" time="0.025" classname="ProductLifecycleCreate"/>
+    <testcase name="header Location present" time="0.025" classname="ProductLifecycleCreate"/>
+    <testcase name="body" time="0.025" classname="ProductLifecycleCreate"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Read it back" id="e8c0763f-e42e-4861-9a9d-64aa62205999" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 200" time="0.008" classname="ProductLifecycleReadItBack"/>
+    <testcase name="same product" time="0.008" classname="ProductLifecycleReadItBack"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Replace (PUT)" id="2f43306e-1796-4f31-9d03-79a12d021802" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.043">
+    <testcase name="status is 200" time="0.043" classname="ProductLifecycleReplacePut"/>
+    <testcase name="replaced" time="0.043" classname="ProductLifecycleReplacePut"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Patch" id="1ff7262b-ac88-40aa-9b8c-223afcbbaf8a" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="status is 200" time="0.042" classname="ProductLifecyclePatch"/>
+    <testcase name="price patched" time="0.042" classname="ProductLifecyclePatch"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Delete as admin" id="5419be08-78e4-4cd7-b1eb-29b74ef82736" timestamp="2026-11-18T19:13:33.982Z" tests="1" failures="0" errors="0" time="0.015">
+    <testcase name="status is 204" time="0.015" classname="ProductLifecycleDeleteAsAdmin"/>
+  </testsuite>
+  <testsuite name="Product lifecycle / Gone after delete" id="7cc9e386-dbf9-4cd0-be07-fd893cfdbb55" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.035">
+    <testcase name="status is 404" time="0.035" classname="ProductLifecycleGoneAfterDelete"/>
+    <testcase name="standard error envelope" time="0.035" classname="ProductLifecycleGoneAfterDelete"/>
+  </testsuite>
+  <testsuite name="Retry safety / Create with Idempotency-Key" id="fdab8994-687c-40ca-97cd-283d70fe1d45" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="status is 201" time="0.007" classname="RetrySafetyCreateWithIdempotencyKey"/>
+    <testcase name="header Idempotent-Replayed absent" time="0.007" classname="RetrySafetyCreateWithIdempotencyKey"/>
+  </testsuite>
+  <testsuite name="Retry safety / Retry with the same key" id="74b32762-0328-4d2f-a7f2-b16321746904" timestamp="2026-11-18T19:13:33.982Z" tests="3" failures="0" errors="0" time="0.009">
+    <testcase name="status is 201" time="0.009" classname="RetrySafetyRetryWithTheSameKey"/>
+    <testcase name="header Idempotent-Replayed = true" time="0.009" classname="RetrySafetyRetryWithTheSameKey"/>
+    <testcase name="same product returned" time="0.009" classname="RetrySafetyRetryWithTheSameKey"/>
+  </testsuite>
+  <testsuite name="Retry safety / Clean up" id="c1bdd439-729a-4a5e-8107-e736064fcfcc" timestamp="2026-11-18T19:13:33.982Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="status is 204" time="0.008" classname="RetrySafetyCleanUp"/>
+  </testsuite>
+  <testsuite name="Roles and versions / User cannot delete" id="defc54da-c50e-46db-a94a-0b587df12c0c" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="status is 403" time="0.006" classname="RolesAndVersionsUserCannotDelete"/>
+    <testcase name="standard error envelope" time="0.006" classname="RolesAndVersionsUserCannotDelete"/>
+  </testsuite>
+  <testsuite name="Roles and versions / Version 1 shape" id="febdbb18-d558-4ab2-b22c-6d35fbed8d8e" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 200" time="0.008" classname="RolesAndVersionsVersion1Shape"/>
+    <testcase name="no sku" time="0.008" classname="RolesAndVersionsVersion1Shape"/>
+  </testsuite>
+  <testsuite name="Roles and versions / Version 2 shape" id="4202f671-bf4e-476c-be41-13e13a97cac4" timestamp="2026-11-18T19:13:33.982Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="status is 200" time="0.008" classname="RolesAndVersionsVersion2Shape"/>
+    <testcase name="has sku and stock" time="0.008" classname="RolesAndVersionsVersion2Shape"/>
+  </testsuite>
+</testsuites>

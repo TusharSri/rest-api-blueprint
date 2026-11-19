@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import io.github.tusharsri.blueprint.config.TraceIdFilter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import io.github.tusharsri.blueprint.config.TraceIdFilter;
 
 /**
  * Base class for API (integration) tests. All subclasses share ONE cached Spring context
@@ -44,8 +44,8 @@ public abstract class AbstractApiIntegrationTest {
     @BeforeEach
     void initMockMvc() {
         mvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilters(traceIdFilter)          // MockMvc does not pick up servlet Filter beans by itself
-                .apply(springSecurity())            // must come after, so the trace id is set before security runs
+                .addFilters(traceIdFilter) // MockMvc does not register servlet Filter beans by itself
+                .apply(springSecurity())   // after the trace filter, so 401/403 errors carry a trace id too
                 .build();
     }
 

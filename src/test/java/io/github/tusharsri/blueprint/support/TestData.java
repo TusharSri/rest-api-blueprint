@@ -1,9 +1,13 @@
 package io.github.tusharsri.blueprint.support;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.core.io.ClassPathResource;
 
 /** Test data helpers: unique SKUs and a small fluent builder for product JSON (no Jackson needed). */
 public final class TestData {
@@ -13,6 +17,19 @@ public final class TestData {
     /** Unique, valid SKU (matches ^[A-Z0-9-]{3,20}$) so tests never collide with each other. */
     public static String uniqueSku() {
         return "T-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+    }
+
+    /** Loads src/test/resources/test-data/<name> and replaces ${sku} with a fresh unique SKU. */
+    public static String fixture(String name) {
+        return fixture(name, uniqueSku());
+    }
+
+    public static String fixture(String name, String sku) {
+        try (InputStream in = new ClassPathResource("test-data/" + name).getInputStream()) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8).replace("${sku}", sku);
+        } catch (IOException e) {
+            throw new IllegalStateException("Missing test fixture: " + name, e);
+        }
     }
 
     public static String loginJson(String username, String password) {

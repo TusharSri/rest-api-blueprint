@@ -11,16 +11,18 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import io.github.tusharsri.blueprint.dto.TokenResponse;
 import io.github.tusharsri.blueprint.security.JwtService;
 import io.github.tusharsri.blueprint.service.AuthService;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /** AuthService with real user store and BCrypt; only the token issuer is mocked. */
+@UnitTest
 class AuthServiceTest {
 
     private JwtService jwtService;

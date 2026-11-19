@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import io.github.tusharsri.blueprint.config.AppProperties;
 import io.github.tusharsri.blueprint.dto.TokenResponse;
 import io.github.tusharsri.blueprint.security.JwtService;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import javax.crypto.SecretKey;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+@UnitTest
 class JwtServiceTest {
 
     private static SecretKey key(String secret) {

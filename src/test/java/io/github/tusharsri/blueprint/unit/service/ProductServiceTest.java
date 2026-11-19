@@ -15,6 +15,7 @@ import io.github.tusharsri.blueprint.model.Category;
 import io.github.tusharsri.blueprint.model.Product;
 import io.github.tusharsri.blueprint.repository.ProductRepository;
 import io.github.tusharsri.blueprint.service.ProductService;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /** Pure unit tests: real in-memory repository (30 seeded products, no latency), no Spring context, no cache. */
+@UnitTest
 class ProductServiceTest {
 
     private ProductService service;

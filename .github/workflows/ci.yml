@@ -1,3 +1,6 @@
+# Copy to .github/workflows/ci.yml
+# Pull-request gate: cheap tests first, expensive ones later. Needs the Gradle suite tasks:
+#   apply(from = "src/test/gradle/test-suites.gradle.kts")   (last line of build.gradle.kts)
 name: CI
 
 on:
@@ -13,30 +16,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  fast-tests:
+    name: Unit + architecture
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew unitTest architectureTest --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reports-fast, path: build/reports/tests/, if-no-files-found: ignore }
+
+  integration-tests:
+    name: Integration + contract
+    needs: fast-tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew && ./gradlew integrationTest contractTest --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reports-integration, path: build/reports/tests/, if-no-files-found: ignore }
 
-      - name: Set up JDK 25
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '25'
-
-      - name: Set up Gradle (wrapper validation + dependency cache)
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build and test
+  blackbox-smoke-and-sanity:
+    name: Black-box smoke + sanity (running app)
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '25' }
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Start the application
         run: |
           chmod +x gradlew
-          ./gradlew build --no-daemon --stacktrace
-
-      - name: Upload test reports
+          nohup ./gradlew bootRun --no-daemon > app.log 2>&1 &
+          curl --silent --fail --retry 60 --retry-delay 3 --retry-connrefused http://localhost:8080/actuator/health
+      - name: Smoke
+        run: bash src/test/api-tests/run-newman.sh smoke ci
+      - name: Sanity
+        run: bash src/test/api-tests/run-newman.sh sanity ci
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: test-reports
-          path: build/reports/tests/test/
+          name: blackbox-results
+          path: |
+            src/test/api-tests/reports/
+            app.log
           if-no-files-found: ignore

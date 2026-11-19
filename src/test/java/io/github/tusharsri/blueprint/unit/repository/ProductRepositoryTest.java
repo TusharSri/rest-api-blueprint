@@ -8,6 +8,7 @@ import io.github.tusharsri.blueprint.exception.ConflictException;
 import io.github.tusharsri.blueprint.model.Category;
 import io.github.tusharsri.blueprint.model.Product;
 import io.github.tusharsri.blueprint.repository.ProductRepository;
+import io.github.tusharsri.blueprint.support.UnitTest;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@UnitTest
 class ProductRepositoryTest {
 
     private ProductRepository repository;
