@@ -31,7 +31,7 @@ jobs:
           curl --silent --fail --retry 60 --retry-delay 3 --retry-connrefused http://localhost:8080/actuator/health
 
       - name: Black-box regression
-        run: src/test/api-tests/run-newman.sh regression ci
+        run: bash src/test/api-tests/run-newman.sh regression ci
 
       - uses: actions/upload-artifact@v4
         if: always()

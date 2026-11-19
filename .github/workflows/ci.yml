@@ -63,9 +63,9 @@ jobs:
           nohup ./gradlew bootRun --no-daemon > app.log 2>&1 &
           curl --silent --fail --retry 60 --retry-delay 3 --retry-connrefused http://localhost:8080/actuator/health
       - name: Smoke
-        run: src/test/api-tests/run-newman.sh smoke ci
+        run: bash src/test/api-tests/run-newman.sh smoke ci
       - name: Sanity
-        run: src/test/api-tests/run-newman.sh sanity ci
+        run: bash src/test/api-tests/run-newman.sh sanity ci
       - uses: actions/upload-artifact@v4
         if: always()
         with:

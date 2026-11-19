@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - name: Smoke suite
-        run: BASE_URL="${{ inputs.base_url }}" src/test/api-tests/run-newman.sh smoke "${{ inputs.environment }}"
+        run: bash BASE_URL="${{ inputs.base_url }}" src/test/api-tests/run-newman.sh smoke "${{ inputs.environment }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: smoke-results, path: src/test/api-tests/reports/, if-no-files-found: ignore }
